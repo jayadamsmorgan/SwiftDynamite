@@ -48,7 +48,7 @@ public struct DynamiteLoader {
         }
         #elseif os(Windows)
 
-        guard let handle = LoadLibraryA(url) else {
+        guard let handle = LoadLibraryA(url.path) else {
             return .failure(.windowsOpenError(path: url.path))
         }
         #endif
@@ -69,7 +69,7 @@ public struct DynamiteLoader {
         #if os(macOS) || os(iOS) || os(tvOS) || os(watchOS) || os(Linux)
         dlclose(library.handle)
         #elseif os(Windows)
-        FreeLibrary(handle)
+        FreeLibrary(library.handle)
         #endif
         _loadedLibraries[library.url] = nil
     }

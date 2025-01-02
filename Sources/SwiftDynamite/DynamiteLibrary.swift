@@ -8,17 +8,23 @@ import Darwin
 import WinSDK
 #endif
 
+#if os(macOS) || os(iOS) || os(tvOS) || os(watchOS) || os(Linux)
+internal typealias HandlePointer = UnsafeMutableRawPointer
+#elseif os(Windows)
+internal typealias HandlePointer = UnsafeMutablePointer<HINSTANCE__>
+#endif
+
 public struct DynamiteLibrary: Equatable {
 
     public let url: URL
 
-    internal let handle: UnsafeMutableRawPointer
+    internal let handle: HandlePointer
 
     public static func == (lhs: DynamiteLibrary, rhs: DynamiteLibrary) -> Bool {
         return lhs.url == rhs.url && lhs.handle == rhs.handle
     }
 
-    internal init(_ url: URL, handle: UnsafeMutableRawPointer) {
+    internal init(_ url: URL, handle: HandlePointer) {
         self.url = url
         self.handle = handle
     }
@@ -39,7 +45,7 @@ public struct DynamiteLibrary: Equatable {
         }
         #elseif os(Windows)
 
-        guard let functionPtr = GetProcAddress(handle, symbolName) else {
+        guard let functionPtr = GetProcAddress(handle, signature) else {
             return .failure(.winError(signature: signature))
         }
         #endif
