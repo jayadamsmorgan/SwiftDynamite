@@ -65,18 +65,13 @@ public struct DynamiteLoader {
         return load(at: url)
     }
 
-    private static func unloadUnchecked(_ library: DynamiteLibrary) -> UnloadError? {
+    private static func unloadUnchecked(_ library: DynamiteLibrary) {
         #if os(macOS) || os(iOS) || os(tvOS) || os(watchOS) || os(Linux)
-        dlerror()  // Clear any old errors
         dlclose(library.handle)
-        if let errorMessage = String(validatingCString: dlerror()) {
-            return .closeError(message: errorMessage)
-        }
         #elseif os(Windows)
         FreeLibrary(handle)
         #endif
         _loadedLibraries[library.url] = nil
-        return nil
     }
 
     @discardableResult
@@ -84,7 +79,8 @@ public struct DynamiteLoader {
         guard loadedLibraries.contains(library) else {
             return .notLoaded(path: library.url.path)
         }
-        return unloadUnchecked(library)
+        unloadUnchecked(library)
+        return nil
     }
 
     @discardableResult
@@ -92,7 +88,8 @@ public struct DynamiteLoader {
         guard let library = _loadedLibraries[url] else {
             return .notLoaded(path: url.path)
         }
-        return unloadUnchecked(library)
+        unloadUnchecked(library)
+        return nil
     }
 
     @discardableResult
