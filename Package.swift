@@ -13,10 +13,7 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "SwiftDynamite",
-            swiftSettings: [
-                .unsafeFlags(["-enable-library-evolution"])
-            ]
+            name: "SwiftDynamite"
         ),
         .testTarget(
             name: "SwiftDynamiteTests",
