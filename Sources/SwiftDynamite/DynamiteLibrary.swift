@@ -8,8 +8,6 @@ import Darwin
 import WinSDK
 #endif
 
-public typealias DynamiteFunction = UnsafeMutableRawPointer
-
 public struct DynamiteLibrary: Equatable {
 
     public let url: URL
@@ -34,15 +32,15 @@ public struct DynamiteLibrary: Equatable {
 
         guard let functionPtr = dlsym(handle, signature) else {
             if let message = String(validatingCString: dlerror()) {
-                return .failure(.dlsymError(message: message))
+                return .failure(.dlsymError(signature: signature, message: message))
             } else {
-                return .failure(.unknownDlsymError)
+                return .failure(.unknownDlsymError(signature: signature))
             }
         }
         #elseif os(Windows)
 
         guard let functionPtr = GetProcAddress(handle, symbolName) else {
-            return .failure(.winError)
+            return .failure(.winError(signature: signature))
         }
         #endif
 
@@ -50,10 +48,4 @@ public struct DynamiteLibrary: Equatable {
 
     }
 
-}
-
-public enum ExecutionError: Error {
-    case dlsymError(message: String)
-    case unknownDlsymError
-    case winError
 }

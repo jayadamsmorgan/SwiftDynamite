@@ -19,7 +19,7 @@ public struct DynamiteLoader {
 
     public static func load(at url: URL) -> Result<DynamiteLibrary, LoadError> {
         guard _loadedLibraries[url] == nil else {
-            return .failure(.alreadyLoaded)
+            return .failure(.alreadyLoaded(path: url.path))
         }
 
         let fileManager = FileManager.default
@@ -39,17 +39,17 @@ public struct DynamiteLoader {
 
         guard let handle = dlopen(url.path, RTLD_NOW) else {
             if let message = String(validatingCString: dlerror()) {
-                return .failure(.openError(message: message))
+                return .failure(.openError(path: url.path, message: message))
             } else {
                 return .failure(
-                    .unknownOpenError
+                    .unknownOpenError(path: url.path)
                 )
             }
         }
         #elseif os(Windows)
 
         guard let handle = LoadLibraryA(url) else {
-            return .failure(.windowsOpenError)
+            return .failure(.windowsOpenError(path: url.path))
         }
         #endif
 
