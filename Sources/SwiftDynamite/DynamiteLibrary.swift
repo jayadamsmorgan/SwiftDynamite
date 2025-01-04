@@ -29,8 +29,23 @@ public struct DynamiteLibrary: Equatable {
         self.handle = handle
     }
 
-    @discardableResult
-    public func getFunction<Fn>(_ signature: String, as fnType: Fn.Type) -> Result<Fn, ExecutionError> {
+    public func getVariable<T>(
+        _ signature: String,
+        as type: T.Type
+    ) -> Result<T, ExecutionError> {
+        let result = getFunction(signature, as: UnsafePointer<T>.self)
+        switch result {
+        case .success(let pointer):
+            return .success(pointer.pointee)
+        case .failure(let error):
+            return .failure(error)
+        }
+    }
+
+    public func getFunction<Fn>(
+        _ signature: String,
+        as fnType: Fn.Type
+    ) -> Result<Fn, ExecutionError> {
 
         #if os(macOS) || os(iOS) || os(tvOS) || os(watchOS) || os(Linux)
         // Clear any old errors
