@@ -12,7 +12,7 @@ let package = Package(
     // name, platforms, products, etc.
     dependencies: [
         // other dependencies
-        .package(url: "https://github.com/jayadamsmorgan/SwiftDynamite", from: "1.0.0"),
+        .package(url: "https://github.com/jayadamsmorgan/SwiftDynamite", from: "1.1.0"),
     ],
     targets: [
         .executableTarget(name: "yourApp", dependencies: [
@@ -30,36 +30,30 @@ let package = Package(
 
 ```swift
 // Load library
-let result = DynamiteLoader.load(at: "your_dynamic_lib.dylib")
+let library = try DynamiteLoader.load(at: "some_library.dylib").get()
 
-switch result {
+// Create type of the function you want to call from the loaded library
+typealias FnType = @convention(c) (Int32, Int32) -> UnsafeMutableRawPointer
 
-// Library loaded
-case .success(let library):
+// Get the function from library
+let function =
+    try library
+    .getFunction("some_function", as: FnType.self)
+    .get()
 
-    // Create type of the function you want to call from the loaded library
-    typealias FnType = @convention(c) (Int32, Int32) -> UnsafeMutableRawPointer
+// Call the function and print result
+print(function(1, 2))
 
-    // Get the function from library
-    let functionResult = library.getFunction("function_name", as: FnType.self)
+// Get the variable from library
+let someStringVariable =
+    try library
+    .getVariable("some_variable", as: UnsafePointer<CChar>.self)
+    .get()
 
-    switch functionResult {
-    case .success(let function):
-        // Function loaded, you can call it
-        let callResult = function(1, 2)
-
-    case .failure(let error):
-        // Failed to load the function
-        print(error.localizedDescription)
-    }
-
-// Library failed to load
-case .failure(let error):
-    print(error.localizedDescription)
-
-}
+// Print the variable
+print(String(validatingCString: someStringVariable) ?? "nil")
 
 // Unload library
-DynamiteLoader.unload(at: "your_dynamic_lib.dylib")
+DynamiteLoader.unload(library)
 ```
 
