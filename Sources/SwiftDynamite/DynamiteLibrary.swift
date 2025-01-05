@@ -31,7 +31,7 @@ public struct DynamiteLibrary: Equatable {
 
     public func getVariable<T>(
         _ signature: String,
-        as type: T.Type
+        as type: T.Type = T.self
     ) -> Result<T, ExecutionError> {
         let result = getFunction(signature, as: UnsafePointer<T>.self)
         switch result {
@@ -44,7 +44,7 @@ public struct DynamiteLibrary: Equatable {
 
     public func getFunction<Fn>(
         _ signature: String,
-        as fnType: Fn.Type
+        as fnType: Fn.Type = Fn.self
     ) -> Result<Fn, ExecutionError> {
 
         #if os(macOS) || os(iOS) || os(tvOS) || os(watchOS) || os(Linux)
